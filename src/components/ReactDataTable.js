@@ -4,121 +4,62 @@ import DeleteIcon from "@mui/icons-material/Delete";
 
 import React, { useEffect, useState } from "react";
 import DataTable from "react-data-table-component";
-import axios from "axios";
-const tableData = [
-  {
-    id: 1,
-    first_name: "Renaud",
-    last_name: "Baudrey",
-    email: "rbaudrey0@ehow.com",
-    gender: "Male",
-    ip_address: "131.107.83.10",
-  },
-  {
-    id: 2,
-    first_name: "Beitris",
-    last_name: "Crinion",
-    email: "bcrinion1@examiner.com",
-    gender: "Female",
-    ip_address: "40.254.196.153",
-  },
-  {
-    id: 3,
-    first_name: "Winna",
-    last_name: "Murty",
-    email: "wmurty2@fotki.com",
-    gender: "Female",
-    ip_address: "166.93.99.123",
-  },
-  {
-    id: 4,
-    first_name: "Maddie",
-    last_name: "Lytle",
-    email: "mlytle3@theglobeandmail.com",
-    gender: "Male",
-    ip_address: "47.45.94.209",
-  },
-  {
-    id: 5,
-    first_name: "Ingram",
-    last_name: "Classen",
-    email: "iclassen4@scribd.com",
-    gender: "Male",
-    ip_address: "6.41.179.242",
-  },
-  {
-    id: 6,
-    first_name: "Lorine",
-    last_name: "Village",
-    email: "lvillage5@whitehouse.gov",
-    gender: "Female",
-    ip_address: "173.101.173.65",
-  },
-  {
-    id: 7,
-    first_name: "Lock",
-    last_name: "Taplin",
-    email: "ltaplin6@rediff.com",
-    gender: "Male",
-    ip_address: "142.207.102.228",
-  },
-  {
-    id: 8,
-    first_name: "Drusie",
-    last_name: "McMennum",
-    email: "dmcmennum7@google.ru",
-    gender: "Female",
-    ip_address: "212.79.76.27",
-  },
-  {
-    id: 9,
-    first_name: "Franklin",
-    last_name: "McKeighan",
-    email: "fmckeighan8@yelp.com",
-    gender: "Male",
-    ip_address: "182.183.245.211",
-  },
-  {
-    id: 10,
-    first_name: "Teriann",
-    last_name: "Darkins",
-    email: "tdarkins9@wsj.com",
-    gender: "Female",
-    ip_address: "22.81.108.66",
-  },
-];
-const ReactDataTable = () => {
-  const [data, setData] = useState([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
+import UserForm from "./UserForm";
+import useUserData from "../hooks/useUserData";
 
-  
+const ReactDataTable = () => {
+  const [selectedUser, setSelectedUser] = useState(null);
+  const {
+    users,
+    setUsers,
+    loading,
+    error,
+    getAllUsers,
+    deleteUserById,
+    updateUserById,
+    addUserData,
+  } = useUserData();
   useEffect(() => {
-    const getUserData = async () => {
-      try {
-        setLoading(true);
-        const response = await axios.get("http://localhost:3000/users");
-        setData(response.data);
-        console.log(response);
-        
-      } catch (error) {
-        console.log(error);
-        setError("Error while getting user data");
-      } finally {
-        setLoading(false);
-      }
-    };
-    getUserData();
+    getAllUsers();
   }, []);
 
   const handleEdit = (row) => {
-    console.log("Edit Row : ", row);
+    setSelectedUser(row);
   };
 
+  const handleUpdateUser = (newUser) => {
+    updateUserById(newUser)
+    const updatedUsers = users.map(user => (user.id === newUser.id ? newUser : user))
+    setUsers(updatedUsers)
+    setSelectedUser(null)
+  }
+
+  //Delete user data
   const handleDelete = (id) => {
-    const filteredData = data.filter((row) => row.id !== id);
-    setData(filteredData);
+    const confirmDelete = window.confirm(
+      "Are you Sure You want to delete user?"
+    );
+    if (confirmDelete) {
+      deleteUserById(id); //Delete user from server
+      const filteredData = users.filter((row) => row.id !== id);
+      setUsers(filteredData);
+    }
   };
+
+  //Add user Data
+  const handleAddUser = (userData) => {
+    const newUser = {
+      id: getRandomBetween(),
+      ...userData,
+    };
+    addUserData(newUser);
+    setUsers((prevData) => [...prevData, newUser]);
+  };
+
+  //Get random number for id
+  function getRandomBetween(min = 100, max = 1000) {
+    return String(Math.floor(Math.random() * (max - min + 1)) + min);
+  }
 
   const columns = [
     {
@@ -170,27 +111,34 @@ const ReactDataTable = () => {
       {loading && <Typography variant="h4">Loading...</Typography>}
 
       {!error && !loading && (
-        <Box
-          sx={{
-            maxWidth: "700px",
-            width: "100%",
-            backgroundColor: "white",
-            padding: 2,
-            borderRadius: 2,
-            boxShadow: 3,
-          }}
-        >
-          <Typography variant="h4">User Data</Typography>
-          <DataTable
-            columns={columns}
-            data={data}
-            pagination
-            progressPending={loading}
-            dense
-            highlightOnHover
-            responsive
+        <>
+          <UserForm
+            selectedUser={selectedUser}
+            handleAddUser={handleAddUser}
+            handleUpdateUser={handleUpdateUser}
           />
-        </Box>
+
+          <Box
+            sx={{
+              width: "90%",
+              backgroundColor: "white",
+              padding: 2,
+              borderRadius: 2,
+              boxShadow: 3,
+            }}
+          >
+            <DataTable
+              title="User Data"
+              columns={columns}
+              data={users}
+              pagination
+              progressPending={loading}
+              dense
+              highlightOnHover
+              responsive
+            />
+          </Box>
+        </>
       )}
     </>
   );

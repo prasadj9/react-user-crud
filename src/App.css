@@ -4,5 +4,12 @@
   display: flex;
   justify-content: center;
   align-items: center;
+  gap: 50px; 
+  flex-direction: row;
 }
 
+@media(max-width : 800px) {
+  .App {
+    flex-direction: column;
+  }
+}
