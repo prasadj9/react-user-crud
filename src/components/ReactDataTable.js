@@ -1,11 +1,11 @@
 import { Box, IconButton, Stack, Tooltip, Typography } from "@mui/material";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
-
 import React, { useEffect, useState } from "react";
 import DataTable from "react-data-table-component";
 import UserForm from "./UserForm";
 import useUserData from "../hooks/useUserData";
+import UserFormikYup from "./UserFormikYup";
 
 const ReactDataTable = () => {
   const [selectedUser, setSelectedUser] = useState(null);
@@ -52,6 +52,8 @@ const ReactDataTable = () => {
       id: getRandomBetween(),
       ...userData,
     };
+    console.log(newUser);
+    
     addUserData(newUser);
     setUsers((prevData) => [...prevData, newUser]);
   };
@@ -112,7 +114,12 @@ const ReactDataTable = () => {
 
       {!error && !loading && (
         <>
-          <UserForm
+          {/* <UserForm
+            selectedUser={selectedUser}
+            handleAddUser={handleAddUser}
+            handleUpdateUser={handleUpdateUser}
+          /> */}
+          <UserFormikYup
             selectedUser={selectedUser}
             handleAddUser={handleAddUser}
             handleUpdateUser={handleUpdateUser}
